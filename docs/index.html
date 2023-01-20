@@ -1,1 +1,101 @@
 <h1>AWS SSO Okta Integration</h1>
+<p>This guide shows how to setup AWS access with SSO using Okta.</p>
+
+<h1>Setup</h1>
+<h2>Okta Developer Account</h2>
+<p>
+    Okta provide developer accounts free of charge with certain limitations. This is really great as developers can try out
+    with Okta. Navigate to <a href="https://developer.okta.com/signup/">https://developer.okta.com/signup/</a> and signup for 
+    an account.
+</p>
+
+<h2>AWS Free Tier Account</h2>
+<p>Use AWS free tier account as the required AWS services do no need any paid services at the time of writing this guide.</p>
+
+<h1>Configuration</h1>
+<p>Rerence: <a href="https://saml-doc.okta.com/SAML_Docs/How-to-Configure-SAML-2.0-for-AWS-Identity-Manager-Center.html">okta documentation</a>
+    <a href="https://docs.aws.amazon.com/singlesignon/latest/userguide/okta-idp.html">AWS documentation</a>
+
+    <h2>Create AWS Okta Application</h2>
+    <ul>
+        <li>Sign in to the Okta admin dashboard</li>
+        <li>On a separate tab navigate to <a href="https://www.okta.com/integrations/aws-iam-identity-center/">aws-iam-identity-center app</a></li>
+        <li>Click "Add Integration" button. This will take you to Okta portal <a href="images/okta-aws-app-create.png" target="_blank">screenshot</a></li>
+        <li>Click "Done"</li>
+        <li>Application is added</li>
+        <li>On the application select "Sign On" tab</li>
+        <li>Scroll down to the section "SAML Signing Certificates"</li>
+        <li>Click "Actions" button. Select the "View IdP Metadata". Copy the content to a file say okta-medatadata.xml 
+            <a href="images/okta-download-metadata.png" target="_blank">screenshot</a></li>
+        <li>Click "Actions" button. Select the "Download Certificate".</li>
+    </ul>    
+
+    <h2>Configue AWS Indentity Center</h2>
+    <ul>
+        <li>Login to AWS console</li>
+        <li>Navigate "AWS Identity Center"</li>
+        <li>Click "Enable". This requires AWS organistion to be created and message will be prompted.
+            <a href="images/aws-enable-aws-identity.png" target="_blank">screenshot</a>
+        </li>
+        <li>Click settings on left pane and click "Chose your identity source" <a href="images/aws-choose-idp-source.png" target="_blank">screenshot</a></li>
+        <li>Click "Actions" and select "Change identity source" <a href="images/aws-change-idp-source.png" target="_blank">screenshot</a></li>
+        <li>Select External Identity Provider <a href="images/aws-selecting-idp-source.png" target="_blank">screenshot</a></li>
+        <li>Configure external identity provider <a href="images/aws-configure-external-idp.png" target="_blank">screenshot</a></li>
+        <ul>
+            <li>Note down the urls for AWS access portal sign-in URL, IAM Identity Center Assertion Consumer Service (ACS) URL, 
+                IAM Identity Center issuer URL</li>
+            <li>Upload the IdP SAML Metadata (saved before okta-medatadata.xml)</li>
+            <li>Uplodad the certificate (downloaded before)</li>
+            <li>Click next</li>
+        </ul>
+        <li>Write "ACCEPT" under the section "Review and confirm"</li>
+        <li>Navigate to settings in AWS Identity Center</li>
+        <li>Click enable "Provisioning" <a href="images/aws-enable-automatic-provisioning.png" target="_blank">screenshot</a></li>
+        <li>Copy SCIM endpoint and the token value and click close button <a href="images/aws-inbound-provisioning.png" target="_blank">screenshot</a></li>
+    </ul>
+
+    <h2>Configue Okta Application</h2>
+    <ul>
+        <li>Back in the Okta admin dashboard</li>
+        <li>Navigate to Applications -> Applications on left pane</li>
+        <li>Click on the application "AWS IAM Identity Center"</li>
+        <li>Select the "Sign On" tab</li>
+        <li>Click "Edit" under settings and confifure <a href="images/okta-configure-acs.png" target="_blank">screenshot</a></li>
+        <ul>
+            <li>Configure "AWS SSO ACS URL" which is noted from AWS Identity Center</li>
+            <li>Configure "AWS SSO issuer URL" which is noted from AWS Identity Center</li>
+        </ul>
+        <li>Navigate to "Provisioning" tab and click "Configure API Integration" 
+            <a href="images/okat-provisioning-tab.png" target="_blank">screenshot</a></li>
+        <li></li>
+
+        <li>Configure the SCIM endpint and the token. Make sure to remove the trailing slash in the SCIM endpoint 
+            <a href="images/okta-provisioning-enable-integration.png" target="_blank">screenshot</a></li>
+
+        <li>Click "Test API Credentials". If it fails check whether trailing slash has been removed from the SCIM endpoint</li>
+        <li>Next "Provisioning to App" page appears and click "Edit" <a href="images/okta-provisioning-to-app.png" target="_blank">screenshot</a></li>
+        <li>Enable the "Create Users", "Update User Attributes" and "Deactive Users" then save</li>
+        <li>Navigate to "Assignments" tab</li>
+        <li>Assign people or groups to the application</li>
+    </ul>
+
+    <h2>Test Login</h2>
+    <ul>
+        <li>On AWS Identity Center navigate to Users and the Okta app assigned user should be available</li>
+        <li>On AWS Identity Center, settings page find the "AWS access portal URL" under the identity source</li>
+        <li>Navigate to the portal access url and user should be re-directed to Okta login page</li>
+        <li>Enter credentials for the user and that should re-direct to the AWS page</li>
+        <li>At this point, user does not have access to any AWS accounts</li>
+    </ul>
+
+    <h2>Assign Users/Groups to AWS Accounts</h2>
+    <ul>
+        <li>Navigate to "Permission sets" in AWS Identity Center <a href="images/aws-permission-set.png" target="_blank">screenshot</a></li>
+        <li>Create new permission set with "Predefined permission set" AdministratorAccess <a href="images/aws-permision-set-configuration.png" target="_blank">screenshot</a></li>
+        <li>Click next on next screen with default values to complete the permission set creation</li>
+        <li>Navigate to "AWS Accounts" section <a href="images/aws-account-setup.png" target="_blank">screenshot</a></li>
+        <li>Select the account and assign users and groups</li>
+        <li>Now when users access the AWS Portal start page they will see the list of accounts and permission set they have access</li>
+    </ul>
+
+</p>
